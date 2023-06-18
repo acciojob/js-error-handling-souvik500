@@ -1,46 +1,43 @@
-//your code here
-//your code here
-class OutOfRangeError extends Error {
-  constructor(arg) {
-    super(`Expression should only consist of integers and +-/* characters and not ${arg}`);
-    this.name = "OutOfRangeError";
-  }
-}
 
 class InvalidExprError extends Error {
-  constructor() {
-    super("Expression should not have an invalid combination of expression");
+  constructor(message) {
+    super(message);
     this.name = "InvalidExprError";
   }
 }
 
-function evalString(str) {
-  if (/[\+\-\*\/]{2,}/g.test(str)) {
-    throw new InvalidExprError();
+class PropertyRequiredError extends InvalidExprError {
+  constructor(property) {
+    super("No property: " + property);
+    this.name = "PropertyRequiredError";
+    this.property = property;
+  }
+}
+function readUser(json) {
+  let user = JSON.parse(json);
+
+  if (!user.age) {
+    throw new PropertyRequiredError("age");
+  }
+  if (!user.name) {
+    throw new PropertyRequiredError("Expression should not have an invalid combination of expression");
   }
 
-  if (/^[\+\*\/]/.test(str)) {
-    throw new SyntaxError("Expression should not start with invalid operator");
-  }
-
-  if (/[\+\*\/-]$/.test(str)) {
-    throw new SyntaxError("Expression should not end with invalid operator");
-  }
-
-  if (/[^0-9 \+\-\*\/]/.test(str)) {
-    throw new OutOfRangeError(str.match(/[^0-9 \+\-\*\/]/)[0]);
-  }
-
-  // Your expression evaluation logic goes here
+  return user;
 }
 
+// Working example with try..catch
+
 try {
-  const expr = "1+2*3/4-5";
-  console.log(evalString(expr));
-} catch (e) {
-  if (e instanceof OutOfRangeError || e instanceof InvalidExprError) {
-    console.error(`${e.name}: ${e.message}`);
+  let user = readUser('{ "age": 25 }');
+} catch (err) {
+  if (err instanceof InvalidExprError) {
+    alert("Invalid data: " + err.message); // Invalid data: No property: name
+    alert(err.name); // PropertyRequiredError
+    alert(err.property); // name
+  } else if (err instanceof SyntaxError) {
+    alert("Expression should not have an invalid combination of expression: " + err.message);
   } else {
-    throw e;
+    throw err; // unknown error, rethrow it
   }
 }
